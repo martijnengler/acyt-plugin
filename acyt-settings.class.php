@@ -126,6 +126,7 @@ class ACYTSettingsPage {
 
 					$feed  = fetch_feed( $url );
 					$items = $feed->get_items();
+					$paginaIds = get_all_page_ids();
 
 					foreach ( $items as $item ) {
 						$titel    = $item->get_title();
@@ -153,16 +154,24 @@ class ACYTSettingsPage {
 //
 //						var_dump( "--------- Next! ---------" );
 
-						$post_id = wp_insert_post(
-							array(
-								'post_title'   => $titel,
-								'post_type'    => 'youtube',
-								'post_content' => $text,
-								'meta_input' => array( '_acyt-yt-videoid' => $videoId, '_acyt-original-publish-date' => $local_date )
-							)
-						);
-					}
+						$postbestaat = false;
+						foreach ($paginaIds as $paginaId){
+							if (get_post_meta( $paginaId, '_acyt-yt-videoid', true ) == $videoId){
+								$postbestaat = true;
+							}
 
+						}
+
+						if (!$postbestaat){
+							wp_insert_post(
+								array(
+									'post_title'   => $titel,
+									'post_type'    => 'youtube',
+									'post_content' => $text,
+									'meta_input' => array( '_acyt-yt-videoid' => $videoId )
+								) );
+						}
+					}
 				}
 			}
 		}
