@@ -118,24 +118,23 @@ class ACYTSettingsPage {
 
 			$response = wp_remote_get( $url );
 
-			if ( is_array( $response ) && !is_wp_error( $response ) ) {
+			if ( is_array( $response ) && ! is_wp_error( $response ) ) {
 				$status = $response['response']['code']; // array of http header lines
 //				var_dump($status);
 
 				if ( $status == '200' ) {
 
-					$feed  = fetch_feed( $url );
-					$items = $feed->get_items();
+					$feed      = fetch_feed( $url );
+					$items     = $feed->get_items();
 					$paginaIds = get_all_page_ids();
 
 					foreach ( $items as $item ) {
-						$titel    = $item->get_title();
-						$videoId  = '';
-						$text     = '';
-						$thumbUrl = '';
-						// get the local date of the video as a UNIX timestamp
-						$local_date = $item->get_local_date("%s");
-						
+						$titel      = $item->get_title();
+						$videoId    = '';
+						$text       = '';
+						$thumbUrl   = '';
+						$local_date = $item->get_local_date( "%F %T" );
+
 						if ( preg_match( '![?&]{1}v=([^&]+)!', $item->get_permalink() . '&', $m2 ) ) {
 							$videoId = $m2[1];
 						}
@@ -151,24 +150,34 @@ class ACYTSettingsPage {
 //						var_dump( $videoId );
 //						var_dump( $thumbUrl );
 //						var_dump( $text );
+//						var_dump($local_date);
 //
 //						var_dump( "--------- Next! ---------" );
 
 						$postbestaat = false;
-						foreach ($paginaIds as $paginaId){
-							if (get_post_meta( $paginaId, '_acyt-yt-videoid', true ) == $videoId){
+						foreach ( $paginaIds as $paginaId ) {
+							if ( get_post_meta( $paginaId, '_acyt-yt-videoid', true ) == $videoId ) {
 								$postbestaat = true;
 							}
 
 						}
 
-						if (!$postbestaat){
-							wp_insert_post(
+						if ( ! $postbestaat ) {
+							$postid = wp_insert_post(
 								array(
 									'post_title'   => $titel,
+									'post_date'    => $local_date,
 									'post_type'    => 'youtube',
+									'post_status'  => 'published',
 									'post_content' => $text,
-									'meta_input' => array( '_acyt-yt-videoid' => $videoId )
+									'meta_input'   => array( '_acyt-yt-videoid' => $videoId )
+								) );
+
+							// gelijk post updaten zodat het wel een draft is, maar dan in ieder geval de date goed staat
+							wp_update_post(
+								array(
+									'ID'          => $postid,
+									'post_status' => 'draft'
 								) );
 						}
 					}
