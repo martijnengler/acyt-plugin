@@ -108,10 +108,11 @@ class ACYTSettingsPage {
 	}
 
 	// from https://wordpress.stackexchange.com/questions/40301/how-do-i-set-a-featured-image-thumbnail-by-image-url-when-using-wp-insert-post
-	protected function Generate_Featured_Image( $image_url, $post_id  ){
+	protected function Generate_Featured_Image( $image_url, $post_id, $unique_part = null ){
+			$unique_id  = uniqid($Unique_part, true);
 			$upload_dir = wp_upload_dir();
 			$image_data = file_get_contents($image_url);
-			$filename = basename($image_url);
+			$filename = pathinfo(basename($image_url), PATHINFO_FILENAME) . "-" . $unique_id . "." . pathinfo(basename($image_url), PATHINFO_EXTENSION);
 			if(wp_mkdir_p($upload_dir['path']))     $file = $upload_dir['path'] . '/' . $filename;
 			else                                    $file = $upload_dir['basedir'] . '/' . $filename;
 			file_put_contents($file, $image_data);
