@@ -178,6 +178,13 @@ JS;
 				return add_query_arg( 'acyt-error', $error->get_error_code(), $location );
 			} );
 		}
+		elseif( $new_meta_value ) {
+			$data = file_get_contents("https://www.googleapis.com/youtube/v3/videos?key=" . AC_YT_API_KEY . "&part=snippet&id=" . $new_meta_value);
+			$json = json_decode($data);
+			$youtube_thumbnail_url = $json->items[0]->snippet->thumbnails->maxres->url;
+
+			$this->Generate_Featured_Image($youtube_thumbnail_url, $post_id, $new_meta_value);
+		}
 	}
 
 	function acyt_content_filter( $content ) {
