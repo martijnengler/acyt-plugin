@@ -74,6 +74,11 @@ class ACYTPostType {
 <script type="text/javascript">
 jQuery(function($){
 	$("#acyt-auto-set-publish-date").click(function(){
+		// show the date fieldset if it's hidden
+		if(!$("#timestampdiv").is(":visible"))
+		{
+			$("#timestampdiv").show()
+		}
 		var unix_timestamp = $(this).data("ts");
 		// Create a new JavaScript Date object based on the timestamp
 		// multiplied by 1000 so that the argument is in milliseconds, not seconds.
