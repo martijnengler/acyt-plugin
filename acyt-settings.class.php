@@ -162,6 +162,9 @@ class ACYTSettingsPage {
 						if ( preg_match( '![?&]{1}v=([^&]+)!', $item->get_permalink() . '&', $m2 ) ) {
 							$videoId = $m2[1];
 						}
+						$data = file_get_contents("https://www.googleapis.com/youtube/v3/videos?key=" . AC_YT_API_KEY . "&part=snippet&id=" . $videoId);
+						$json = json_decode($data);
+						$youtube_thumbnail_url = $json->items[0]->snippet->thumbnails->maxres->url;
 
 						$enclosure = $item->get_enclosure();
 
