@@ -133,8 +133,9 @@ class ACYTSettingsPage {
 						$videoId  = '';
 						$text     = '';
 						$thumbUrl = '';
-
-
+						// get the local date of the video as a UNIX timestamp
+						$local_date = $item->get_local_date("%s");
+						
 						if ( preg_match( '![?&]{1}v=([^&]+)!', $item->get_permalink() . '&', $m2 ) ) {
 							$videoId = $m2[1];
 						}
@@ -168,8 +169,7 @@ class ACYTSettingsPage {
 									'post_type'    => 'youtube',
 									'post_content' => $text,
 									'meta_input' => array( '_acyt-yt-videoid' => $videoId )
-								)
-							);
+								) );
 						}
 					}
 				}

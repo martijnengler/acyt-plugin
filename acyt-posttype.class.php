@@ -61,10 +61,70 @@ class ACYTPostType {
 	public function acyt_build_meta_box( $post ) {
 		wp_nonce_field( basename( __FILE__ ), 'acyt-yt-videoid_nonce' );
 
-		$current_yt_id = esc_html( get_post_meta( $post->ID, '_acyt-yt-videoid', true ) );
+		$current_yt_id 	= esc_html( get_post_meta( $post->ID, '_acyt-yt-videoid', true ) );
+		$publish_ts		  = get_post_meta( $post->ID, '_acyt-original-publish-date', true );
+		$publish_date		= esc_html( strftime("%c", $publish_ts) );
 
-		$htmloutput = "<div class='inside'><p><input type='text' name='acyt-yt-videoid' value='" . $current_yt_id . "' /></p></div>";
-		echo $htmloutput;
+		$htmloutput = "<div class='inside'>";
+		$htmloutput .= "<p>ID: <input type='text' name='acyt-yt-videoid' value='" . $current_yt_id . "' /></p>";
+		$htmloutput .= sprintf("<p>Date: %s (<a href='#' id='acyt-auto-set-publish-date' data-ts='%d'>set as publish date</a>)</p>", $publish_date, $publish_ts);
+		$htmloutput .= "</div>";
+
+		$js = <<<JS
+<script type="text/javascript">
+jQuery(function($){
+	$("#acyt-auto-set-publish-date").click(function(){
+		// show the date fieldset if it's hidden
+		if(!$("#timestampdiv").is(":visible"))
+		{
+			$("#timestampdiv").show()
+		}
+		var unix_timestamp = $(this).data("ts");
+		// Create a new JavaScript Date object based on the timestamp
+		// multiplied by 1000 so that the argument is in milliseconds, not seconds.
+		var date = new Date(unix_timestamp*1000);
+
+		// I hate month math in JS, isn't there an easier way? :(
+		var month = date.getMonth() + 1;
+		if(month == 13)
+		{
+			month = 1;
+		}
+
+		$("#mm").val(month);
+		$("#jj").val(date.getDate());
+		$("#aa").val(date.getFullYear());
+		$("#hh").val(date.getHours());
+		$("#mn").val(date.getMinutes());
+	});
+});
+</script>
+JS;
+		echo $htmloutput . $js;
+	}
+
+	// from https://wordpress.stackexchange.com/questions/40301/how-do-i-set-a-featured-image-thumbnail-by-image-url-when-using-wp-insert-post
+	protected function Generate_Featured_Image( $image_url, $post_id, $unique_part = null ){
+			$unique_id  = uniqid($Unique_part, true);
+			$upload_dir = wp_upload_dir();
+			$image_data = file_get_contents($image_url);
+			$filename = pathinfo(basename($image_url), PATHINFO_FILENAME) . "-" . $unique_id . "." . pathinfo(basename($image_url), PATHINFO_EXTENSION);
+			if(wp_mkdir_p($upload_dir['path']))     $file = $upload_dir['path'] . '/' . $filename;
+			else                                    $file = $upload_dir['basedir'] . '/' . $filename;
+			file_put_contents($file, $image_data);
+
+			$wp_filetype = wp_check_filetype($filename, null );
+			$attachment = array(
+					'post_mime_type' => $wp_filetype['type'],
+					'post_title' => sanitize_file_name($filename),
+					'post_content' => '',
+					'post_status' => 'inherit'
+			);
+			$attach_id = wp_insert_attachment( $attachment, $file, $post_id );
+			require_once(ABSPATH . 'wp-admin/includes/image.php');
+			$attach_data = wp_generate_attachment_metadata( $attach_id, $file );
+			$res1= wp_update_attachment_metadata( $attach_id, $attach_data );
+			$res2= set_post_thumbnail( $post_id, $attach_id );
 	}
 
 	function acyt_save_meta_box( $post_id, $post ) {
@@ -117,6 +177,13 @@ class ACYTPostType {
 			add_filter( 'redirect_post_location', function ( $location ) use ( $error ) {
 				return add_query_arg( 'acyt-error', $error->get_error_code(), $location );
 			} );
+		}
+		elseif( $new_meta_value and !has_post_thumbnail($post)) {
+			$data = file_get_contents("https://www.googleapis.com/youtube/v3/videos?key=" . AC_YT_API_KEY . "&part=snippet&id=" . $new_meta_value);
+			$json = json_decode($data);
+			$youtube_thumbnail_url = $json->items[0]->snippet->thumbnails->maxres->url;
+
+			$this->Generate_Featured_Image($youtube_thumbnail_url, $post_id, $new_meta_value);
 		}
 	}
 
