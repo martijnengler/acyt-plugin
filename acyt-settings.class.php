@@ -188,7 +188,6 @@ class ACYTSettingsPage {
 								'meta_input' => array( '_acyt-yt-videoid' => $videoId, '_acyt-original-publish-date' => $local_date )
 							)
 						);
-						$this->Generate_Featured_Image($youtube_thumbnail_url, $post_id);
 					}
 
 				}
