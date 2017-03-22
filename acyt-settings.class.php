@@ -157,8 +157,7 @@ class ACYTSettingsPage {
 						$thumbUrl = '';
 						// get the local date of the video as a UNIX timestamp
 						$local_date = $item->get_local_date("%s");
-
-
+						
 						if ( preg_match( '![?&]{1}v=([^&]+)!', $item->get_permalink() . '&', $m2 ) ) {
 							$videoId = $m2[1];
 						}
@@ -180,7 +179,7 @@ class ACYTSettingsPage {
 //
 //						var_dump( "--------- Next! ---------" );
 
-						wp_insert_post(
+						$post_id = wp_insert_post(
 							array(
 								'post_title'   => $titel,
 								'post_type'    => 'youtube',
@@ -188,8 +187,7 @@ class ACYTSettingsPage {
 								'meta_input' => array( '_acyt-yt-videoid' => $videoId, '_acyt-original-publish-date' => $local_date )
 							)
 						);
-
-
+						$this->Generate_Featured_Image($youtube_thumbnail_url, $post_id);
 					}
 
 				}
