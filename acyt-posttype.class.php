@@ -61,13 +61,41 @@ class ACYTPostType {
 	public function acyt_build_meta_box( $post ) {
 		wp_nonce_field( basename( __FILE__ ), 'acyt-yt-videoid_nonce' );
 
-		$current_yt_id = esc_html( get_post_meta( $post->ID, '_acyt-yt-videoid', true ) );
+		$current_yt_id 	= esc_html( get_post_meta( $post->ID, '_acyt-yt-videoid', true ) );
+		$publish_ts		  = get_post_meta( $post->ID, '_acyt-original-publish-date', true );
+		$publish_date		= esc_html( strftime("%c", $publish_ts) );
 
 		$htmloutput = "<div class='inside'>";
 		$htmloutput .= "<p>ID: <input type='text' name='acyt-yt-videoid' value='" . $current_yt_id . "' /></p>";
-		$htmloutput .= "<p>Date: %s (set as publish date)</p>";
+		$htmloutput .= sprintf("<p>Date: %s (<a href='#' id='acyt-auto-set-publish-date' data-ts='%d'>set as publish date</a>)</p>", $publish_date, $publish_ts);
 		$htmloutput .= "</div>";
-		echo $htmloutput;
+
+		$js = <<<JS
+<script type="text/javascript">
+jQuery(function($){
+	$("#acyt-auto-set-publish-date").click(function(){
+		var unix_timestamp = $(this).data("ts");
+		// Create a new JavaScript Date object based on the timestamp
+		// multiplied by 1000 so that the argument is in milliseconds, not seconds.
+		var date = new Date(unix_timestamp*1000);
+
+		// I hate month math in JS, isn't there an easier way? :(
+		var month = date.getMonth() + 1;
+		if(month == 13)
+		{
+			month = 1;
+		}
+
+		$("#mm").val(month);
+		$("#jj").val(date.getDate());
+		$("#aa").val(date.getFullYear());
+		$("#hh").val(date.getHours());
+		$("#mn").val(date.getMinutes());
+	});
+});
+</script>
+JS;
+		echo $htmloutput . $js;
 	}
 
 	function acyt_save_meta_box( $post_id, $post ) {
