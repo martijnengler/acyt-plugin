@@ -63,7 +63,10 @@ class ACYTPostType {
 
 		$current_yt_id = esc_html( get_post_meta( $post->ID, '_acyt-yt-videoid', true ) );
 
-		$htmloutput = "<div class='inside'><p><input type='text' name='acyt-yt-videoid' value='" . $current_yt_id . "' /></p></div>";
+		$htmloutput = "<div class='inside'>";
+		$htmloutput .= "<p>ID: <input type='text' name='acyt-yt-videoid' value='" . $current_yt_id . "' /></p>";
+		$htmloutput .= "<p>Date: %s (set as publish date)</p>";
+		$htmloutput .= "</div>";
 		echo $htmloutput;
 	}
 
