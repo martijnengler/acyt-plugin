@@ -107,30 +107,6 @@ class ACYTSettingsPage {
 			isset( $this->options['acyt-yt-id'] ) ? esc_attr( $this->options['acyt-yt-id'] ) : '' );
 	}
 
-	// from https://wordpress.stackexchange.com/questions/40301/how-do-i-set-a-featured-image-thumbnail-by-image-url-when-using-wp-insert-post
-	protected function Generate_Featured_Image( $image_url, $post_id, $unique_part = null ){
-			$unique_id  = uniqid($Unique_part, true);
-			$upload_dir = wp_upload_dir();
-			$image_data = file_get_contents($image_url);
-			$filename = pathinfo(basename($image_url), PATHINFO_FILENAME) . "-" . $unique_id . "." . pathinfo(basename($image_url), PATHINFO_EXTENSION);
-			if(wp_mkdir_p($upload_dir['path']))     $file = $upload_dir['path'] . '/' . $filename;
-			else                                    $file = $upload_dir['basedir'] . '/' . $filename;
-			file_put_contents($file, $image_data);
-
-			$wp_filetype = wp_check_filetype($filename, null );
-			$attachment = array(
-					'post_mime_type' => $wp_filetype['type'],
-					'post_title' => sanitize_file_name($filename),
-					'post_content' => '',
-					'post_status' => 'inherit'
-			);
-			$attach_id = wp_insert_attachment( $attachment, $file, $post_id );
-			require_once(ABSPATH . 'wp-admin/includes/image.php');
-			$attach_data = wp_generate_attachment_metadata( $attach_id, $file );
-			$res1= wp_update_attachment_metadata( $attach_id, $attach_data );
-			$res2= set_post_thumbnail( $post_id, $attach_id );
-	}
-
 	function acyt_validate_channelid() {
 		$channelid = sanitize_text_field( $_POST['acyt-yt-id']['acyt-yt-id'] );
 
