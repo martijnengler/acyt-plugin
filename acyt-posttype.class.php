@@ -61,12 +61,14 @@ class ACYTPostType {
 	public function acyt_build_meta_box( $post ) {
 		wp_nonce_field( basename( __FILE__ ), 'acyt-yt-videoid_nonce' );
 
-		$current_yt_id = esc_html( get_post_meta( $post->ID, '_acyt-yt-videoid', true ) );
-		$publish_ts    = get_post_meta( $post->ID, '_acyt-original-publish-date', true );
-		$publish_date  = esc_html( strftime( "%c", $publish_ts ) );
+		$current_yt_id 				= esc_html( get_post_meta( $post->ID, '_acyt-yt-videoid', true ) );
+		$current_vtt_media_id = esc_html( get_post_meta( $post->ID, '_acyt_subtitle_file', true ) );
+		$publish_ts    				= get_post_meta( $post->ID, '_acyt-original-publish-date', true );
+		$publish_date  				= esc_html( strftime( "%c", $publish_ts ) );
 
 		$htmloutput = "<div class='inside'>";
 		$htmloutput .= "<p>ID: <input type='text' name='acyt-yt-videoid' value='" . $current_yt_id . "' /></p>";
+		$htmloutput .= "<p>VTT media ID: <input type='text' name='_acyt_subtitle_file' value='" . $current_vtt_media_id . "' /></p>";
 		$htmloutput .= "</div>";
 
 		echo $htmloutput;
@@ -106,6 +108,8 @@ class ACYTPostType {
 		if ( ! isset( $_POST['acyt-yt-videoid_nonce'] ) || ! wp_verify_nonce( $_POST['acyt-yt-videoid_nonce'], basename( __FILE__ ) ) ) {
 			return $post_id;
 		}
+
+		update_post_meta($post_id, "_acyt_subtitle_file", $_POST["_acyt_subtitle_file"]);
 
 		/* Get the meta key. */
 		$meta_key = '_acyt-yt-videoid';
