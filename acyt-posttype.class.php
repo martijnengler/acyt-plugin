@@ -14,7 +14,7 @@ class ACYTPostType {
 
 	public function register_custom_post_type() {
 		$labels = array(
-			'name'               => 'YouTube Video\'s',
+			'name'               => 'Apple Videotips',
 			'singular_name'      => 'Video',
 			'add_new'            => 'Nieuwe video toevoegen',
 			'add_new_item'       => 'Nieuwe video toevoegen',
