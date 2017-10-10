@@ -126,7 +126,8 @@ class ACYTSettingsPage {
 
 					$feed      = fetch_feed( $url );
 					$items     = $feed->get_items();
-					$paginaIds = get_all_page_ids();
+					global $wpdb;
+					$paginaIds = $wpdb->get_col("SELECT ID FROM wp_posts WHERE post_type = 'youtube'");
 
 					foreach ( $items as $item ) {
 						$titel      = $item->get_title();
