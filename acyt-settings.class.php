@@ -127,7 +127,9 @@ class ACYTSettingsPage {
 					$feed      = fetch_feed( $url );
 					$items     = $feed->get_items();
 					global $wpdb;
-					$paginaIds = $wpdb->get_col("SELECT ID FROM wp_posts WHERE post_type = 'youtube'");
+					$paginaIds = $wpdb->get_col("SELECT pm.meta_value AS youtube_id FROM wp_posts p
+																				LEFT JOIN wp_postmeta pm ON p.ID = pm.post_ID
+																				WHERE p.post_type = 'youtube' AND pm.meta_key = '_acyt-yt-videoid'");
 
 					foreach ( $items as $item ) {
 						$titel      = $item->get_title();
@@ -155,32 +157,27 @@ class ACYTSettingsPage {
 //
 //						var_dump( "--------- Next! ---------" );
 
-						$postbestaat = false;
-						foreach ( $paginaIds as $paginaId ) {
-							if ( get_post_meta( $paginaId, '_acyt-yt-videoid', true ) == $videoId ) {
-								$postbestaat = true;
-							}
-
+						if(in_array($videoId, $paginaIds))
+						{
+							continue;
 						}
 
-						if ( ! $postbestaat ) {
-							$postid = wp_insert_post(
-								array(
-									'post_title'   => $titel,
-									'post_date'    => $local_date,
-									'post_type'    => 'youtube',
-									'post_status'  => 'published',
-									'post_content' => $text,
-									'meta_input'   => array( '_acyt-yt-videoid' => $videoId )
-								) );
+						$postid = wp_insert_post(
+							array(
+								'post_title'   => $titel,
+								'post_date'    => $local_date,
+								'post_type'    => 'youtube',
+								'post_status'  => 'published',
+								'post_content' => $text,
+								'meta_input'   => array( '_acyt-yt-videoid' => $videoId )
+							) );
 
-							// gelijk post updaten zodat het wel een draft is, maar dan in ieder geval de date goed staat
-							wp_update_post(
-								array(
-									'ID'          => $postid,
-									'post_status' => 'draft'
-								) );
-						}
+						// gelijk post updaten zodat het wel een draft is, maar dan in ieder geval de date goed staat
+						wp_update_post(
+							array(
+								'ID'          => $postid,
+								'post_status' => 'draft'
+							) );
 					}
 				}
 			}
