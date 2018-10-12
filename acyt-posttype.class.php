@@ -156,7 +156,16 @@ class ACYTPostType {
 		} elseif ( $new_meta_value and ! has_post_thumbnail( $post ) ) {
 			$data                  = file_get_contents( "https://www.googleapis.com/youtube/v3/videos?key=" . AC_YT_API_KEY . "&part=snippet&id=" . $new_meta_value );
 			$json                  = json_decode( $data );
-			$youtube_thumbnail_url = $json->items[0]->snippet->thumbnails->maxres->url;
+			$thumbs								= $json->items[0]->snippet->thumbnails;
+			// maxres thumb isn't always there for some reason
+			if(!empty($thumbs->maxres))
+			{
+				$youtube_thumbnail_url = $thumbs->maxres->url;
+			}
+			else
+			{
+				$youtube_thumbnail_url = $thumbs->standard->url;
+			}
 
 			$this->Generate_Featured_Image( $youtube_thumbnail_url, $post_id, $new_meta_value );
 		}
