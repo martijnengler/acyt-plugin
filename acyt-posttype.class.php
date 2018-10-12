@@ -157,14 +157,16 @@ class ACYTPostType {
 			$data                  = file_get_contents( "https://www.googleapis.com/youtube/v3/videos?key=" . AC_YT_API_KEY . "&part=snippet&id=" . $new_meta_value );
 			$json                  = json_decode( $data );
 			$thumbs								= $json->items[0]->snippet->thumbnails;
-			// maxres thumb isn't always there for some reason
-			if(!empty($thumbs->maxres))
+			// maxres thumb isn't always there for some reason, so just check for the highest resolution thumb
+			$largest_size = 0;
+			foreach($thumbs as $one_thumb_size)
 			{
-				$youtube_thumbnail_url = $thumbs->maxres->url;
-			}
-			else
-			{
-				$youtube_thumbnail_url = $thumbs->standard->url;
+				$this_size = $one_thumb_size->width * $one_thumb_size->height;
+				if($this_size > $largest_size)
+				{
+					$largest_size 	= $this_size;
+					$youtube_thumbnail_url = $one_thumb_size->url;
+				}
 			}
 
 			$this->Generate_Featured_Image( $youtube_thumbnail_url, $post_id, $new_meta_value );
