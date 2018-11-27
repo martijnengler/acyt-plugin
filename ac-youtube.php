@@ -17,8 +17,12 @@ if ( is_admin() ) {
 
 $acyt_post_type = new ACYTPostType();
 
-function ac_refresh_youtube_posts($channelid)
+function ac_refresh_youtube_posts($channelid = null)
 {
+	if(!$channelid)
+	{
+		$channelid = get_option("acyt-yt-id")["acyt-yt-id"];
+	}
 	$url = 'https://www.youtube.com/channel/' . $channelid;
 	//			var_dump( $url );
 
