@@ -17,6 +17,11 @@ if ( is_admin() ) {
 
 $acyt_post_type = new ACYTPostType();
 
+add_action("wp_ajax_nopriv_ac_refresh_youtube_posts", function(){
+	ac_refresh_youtube_posts();
+	wp_die();
+});
+
 function ac_refresh_youtube_posts($channelid = null)
 {
 	if(!$channelid)
